@@ -1,8 +1,12 @@
 #!/usr/bin/python
 import requests
+from requests.auth import HTTPBasicAuth
 import json
 import os
 import sys
+###
+import urllib3
+urllib3.disable_warnings()
 
 #import needed vars from env
 bipMGMT = os.getenv('BIP')
@@ -11,7 +15,7 @@ bipPass = os.getenv('BIPPASS')
 bipPodCIDR = os.getenv('BIPPODCIDR')
 bipName = os.getenv('BIPNAME')
 bipFlanPIP = os.getenv('BIPFLANPIP')
-k8 = os.getnenv('K8')
+k8 = os.getenv('K8')
 k8Token = os.getenv('K8TOKEN')
 
 #Find new VTEP MAC address on the BIG-IP
@@ -25,7 +29,7 @@ except requests.exceptions.RequestException as err:
     print(err)
     sys.exit(1)
 try:
-    vtepMAC = br.json().entries.https://localhost/mgmt/tm/net/tunnels/tunnel/~Common~flannel_vxlan/~Common~flannel_vxlan/stats.nestedStats.entries.macAddr.description
+    vtepMAC = br.json()['entries']['https://localhost/mgmt/tm/net/tunnels/tunnel/~Common~flannel_vxlan/~Common~flannel_vxlan/stats.nestedStats.entries.macAddr.description']
 except json.decoder.JSONDecodeError as err:
     print(err)
     sys.exit(1)
@@ -44,5 +48,6 @@ except requests.exceptions.HTTPError as err:
 except requests.exceptions.RequestException as err:
     print(err)
     sys.exit(1)
+
 print(kr.json())
 sys.exit(0)
