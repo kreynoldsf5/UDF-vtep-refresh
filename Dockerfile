@@ -1,3 +1,4 @@
 FROM python:3
-ADD vtep-refresh.py.py /
-RUN [ "python", "vtep-refresh.py" ]
+RUN pip install requests
+ADD vtep-refresh.py /
+CMD [ "python", "vtep-refresh.py" ]

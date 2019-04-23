@@ -29,7 +29,7 @@ except requests.exceptions.RequestException as err:
     print(err)
     sys.exit(1)
 try:
-    vtepMAC = br.json()['entries']['https://localhost/mgmt/tm/net/tunnels/tunnel/~Common~flannel_vxlan/~Common~flannel_vxlan/stats.nestedStats.entries.macAddr.description']
+    vtepMAC = br.json()['entries']['https://localhost/mgmt/tm/net/tunnels/tunnel/~Common~flannel_vxlan/~Common~flannel_vxlan/stats']['nestedStats']['entries']['macAddr']['description']
 except json.decoder.JSONDecodeError as err:
     print(err)
     sys.exit(1)
