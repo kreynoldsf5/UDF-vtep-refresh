@@ -44,7 +44,7 @@ def main():
     api_instance = client.CoreV1Api()
     body = client.V1Node()
     body.spec = client.V1NodeSpec(pod_cidr=bipPodCIDR)
-    body.manifest = client.V1ObjectMeta(name=bipName, annotations={"flannel.alpha.coreos.com/backend-data": {"VtepMAC": vtepMAC}, "flannel.alpha.coreos.com/public-ip": bipFlanPIP, "flannel.alpha.coreos.com/backend-type": "vxlan", "flannel.alpha.coreos.com/kube-subnet-manager": "true"})
+    body.metadata = client.V1ObjectMeta(name=bipName, annotations={"flannel.alpha.coreos.com/backend-data": {"VtepMAC": vtepMAC}, "flannel.alpha.coreos.com/public-ip": bipFlanPIP, "flannel.alpha.coreos.com/backend-type": "vxlan", "flannel.alpha.coreos.com/kube-subnet-manager": "true"})
 
     try: 
         api_response = api_instance.create_node(body, pretty=True)
