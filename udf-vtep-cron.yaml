@@ -1,0 +1,56 @@
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: kube-system
+  name: udf-vtep-refresh
+rules:
+  resources:
+  - nodes
+  verbs:
+  - 'create'
+  - 'update'
+  - 'get'
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: udf-vtep-refresh
+  namespace: kubesystem
+subjects:
+- kind: ServiceAccount
+  name: udf-vtep-refresh
+  namespace: kube-system
+roleRef:
+  kind: Role
+  name: udf-vtep-refresh
+  apiGroup: ""
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: udf-vtep-refresh
+  namespace: kube-system
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: udf-vtep-refresh
+  namespace: kube-system
+spec:
+  schedule: "*/5 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: udf-vtep-refresh
+          containers:
+          - name: udf-vtep-refresh
+            image: kreynoldsf5/udf-vtep-refresh:latest
+            command:
+            - python
+            - vtep-refresh.py
+            envFrom:
+            - secretRef:
+                name: udf-vtep-refresh-secret
+          restartPolicy: OnFailure
