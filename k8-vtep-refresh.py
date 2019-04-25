@@ -26,15 +26,15 @@ def main():
         br = requests.get('https://{}/mgmt/tm/net/tunnels/tunnel/~Common~flannel_vxlan/stats?options=all-properties'.format(bipMGMT), verify=False, auth=HTTPBasicAuth(bipUser, bipPass))
         br.raise_for_status()
     except requests.exceptions.HTTPError as err:
-        pprint(err)
+        print(err)
         sys.exit(1)
     except requests.exceptions.RequestException as err:
-        pprint(err)
+        print(err)
         sys.exit(1)
     try:
         vtepMAC = br.json()['entries']['https://localhost/mgmt/tm/net/tunnels/tunnel/~Common~flannel_vxlan/~Common~flannel_vxlan/stats']['nestedStats']['entries']['macAddr']['description']
     except json.decoder.JSONDecodeError as err:
-        pprint(err)
+        print(err)
         sys.exit(1)
     
     ##################
@@ -48,7 +48,8 @@ def main():
 
     for item in nodes.items:
         if item.metadata.name == bipName:
-            update = False
+            if item.metadata.annotations['flannel.alpha.coreos.com/backend-data'] == '{{"VtepMAC": {}}}'.format(vtepMAC):
+                update = False
 
     if update:
         body = client.V1Node()
@@ -62,6 +63,9 @@ def main():
         except ApiException as e:
             print("Exception when calling CoreV1Api->create_node: %s\n" % e)
             sys.exit(1)
+    else:
+        print("Node {} does not need to be created/updated.".format(bipName))
+        sys.exit(0)
 
 if __name__ == '__main__':
     main()
