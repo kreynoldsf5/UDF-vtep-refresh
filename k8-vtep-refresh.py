@@ -42,17 +42,26 @@ def main():
     ##################
     config.load_incluster_config()
     api_instance = client.CoreV1Api()
-    body = client.V1Node()
-    body.spec = client.V1NodeSpec(pod_cidr=bipPodCIDR)
-    body.metadata = client.V1ObjectMeta(name=bipName, annotations={"flannel.alpha.coreos.com/backend-data": {"VtepMAC": vtepMAC}, "flannel.alpha.coreos.com/public-ip": bipFlanPIP, "flannel.alpha.coreos.com/backend-type": "vxlan", "flannel.alpha.coreos.com/kube-subnet-manager": "true"})
 
-    try: 
-        api_response = api_instance.create_node(body, pretty=True)
-        pprint(api_response)
-        sys.exit(0)
-    except ApiException as e:
-        print("Exception when calling CoreV1Api->create_node: %s\n" % e)
-        sys.exit(1)
+    update = True
+    nodes = api_instance.list_node(watch=False)
+
+    for item in nodes.items:
+        if item.metadata.name == bipName:
+            update = False
+
+    if update:
+        body = client.V1Node()
+        body.spec = client.V1NodeSpec(pod_cidr=bipPodCIDR)
+        body.metadata = client.V1ObjectMeta(name=bipName, annotations={"flannel.alpha.coreos.com/backend-data": '{{"VtepMAC": {}}}'.format(vtepMAC), "flannel.alpha.coreos.com/public-ip": bipFlanPIP, "flannel.alpha.coreos.com/backend-type": "vxlan", "flannel.alpha.coreos.com/kube-subnet-manager": "true"})
+
+        try: 
+            api_response = api_instance.create_node(body, pretty=True)
+            pprint(api_response)
+            sys.exit(0)
+        except ApiException as e:
+            print("Exception when calling CoreV1Api->create_node: %s\n" % e)
+            sys.exit(1)
 
 if __name__ == '__main__':
     main()
