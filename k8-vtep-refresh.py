@@ -48,6 +48,7 @@ def main():
 
     for item in nodes.items:
         if item.metadata.name == bipName:
+            patch = True
             if item.metadata.annotations['flannel.alpha.coreos.com/backend-data'] == '{{"VtepMAC": {}}}'.format(vtepMAC):
                 update = False
 
@@ -56,13 +57,22 @@ def main():
         body.spec = client.V1NodeSpec(pod_cidr=bipPodCIDR)
         body.metadata = client.V1ObjectMeta(name=bipName, annotations={"flannel.alpha.coreos.com/backend-data": '{{"VtepMAC": {}}}'.format(vtepMAC), "flannel.alpha.coreos.com/public-ip": bipFlanPIP, "flannel.alpha.coreos.com/backend-type": "vxlan", "flannel.alpha.coreos.com/kube-subnet-manager": "true"})
 
-        try: 
-            api_response = api_instance.create_node(body, pretty=True)
-            pprint(api_response)
-            sys.exit(0)
-        except ApiException as e:
-            print("Exception when calling CoreV1Api->create_node: %s\n" % e)
-            sys.exit(1)
+        if patch:
+            try:
+                api_response = api_instance.patch_node(bipName, body, pretty=True)
+                pprint(api_response)
+                sys.exit(0)
+            except ApiException as e:
+                print("Exception when calling CoreV1Api->create_node: %s\n" % e)
+                sys.exit(1)
+        else:
+            try: 
+                api_response = api_instance.create_node(body, pretty=True)
+                pprint(api_response)
+                sys.exit(0)
+            except ApiException as e:
+                print("Exception when calling CoreV1Api->create_node: %s\n" % e)
+                sys.exit(1)
     else:
         print("Node {} does not need to be created/updated.".format(bipName))
         sys.exit(0)
